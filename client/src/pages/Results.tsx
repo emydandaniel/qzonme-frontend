@@ -22,42 +22,43 @@ const Results: React.FC<ResultsProps> = ({ params }) => {
   // Implement direct fetch approach that ignores all caching
   const [rawAttempts, setRawAttempts] = React.useState<any[]>([]);
   const [rawAttempt, setRawAttempt] = React.useState<any>(null);
-  
+  const BASE_URL = import.meta.env.VITE_API_URL;
+
   // Direct fetch with no caching
   const fetchAllDataDirectly = React.useCallback(async () => {
     if (!quizId || !attemptId) return;
-    
+
     try {
       console.log("Results page: Directly fetching fresh data");
       const timestamp = Date.now();
-      
+
       // Fetch attempts with cache busting
-      const attemptsResponse = await fetch(`/api/quizzes/${quizId}/attempts?t=${timestamp}`, {
+      const attemptsResponse = await fetch(`${BASE_URL}/api/quizzes/${quizId}/attempts?t=${timestamp}`, {
         headers: {
           'Cache-Control': 'no-cache, no-store, must-revalidate',
           'Pragma': 'no-cache',
           'Expires': '0'
         }
       });
-      
+
       // Fetch this specific attempt with cache busting
-      const attemptResponse = await fetch(`/api/quiz-attempts/${attemptId}?t=${timestamp}`, {
+      const attemptResponse = await fetch(`${BASE_URL}/api/quiz-attempts/${attemptId}?t=${timestamp}`, {
         headers: {
           'Cache-Control': 'no-cache, no-store, must-revalidate',
           'Pragma': 'no-cache',
           'Expires': '0'
         }
       });
-      
+
       if (attemptsResponse.ok && attemptResponse.ok) {
         const attemptsData = await attemptsResponse.json();
         const attemptData = await attemptResponse.json();
-        
+
         const attemptsList = attemptsData.data || attemptsData;
         const attemptResult = attemptData.data || attemptData;
-        
+
         console.log(`Results page: Direct fetch retrieved ${attemptsList.length} attempts`);
-        
+
         setRawAttempts(attemptsList);
         setRawAttempt(attemptResult);
       }
@@ -65,22 +66,22 @@ const Results: React.FC<ResultsProps> = ({ params }) => {
       console.error("Error directly fetching results data:", error);
     }
   }, [quizId, attemptId]);
-  
+
   // Set up regular refresh for the data
   useEffect(() => {
     if (quizId && attemptId) {
       // Initial fetch
       fetchAllDataDirectly();
-      
+
       // Periodic refresh - much less frequent
       const intervalId = setInterval(fetchAllDataDirectly, 45000); // Every 45 seconds
-      
+
       return () => {
         clearInterval(intervalId);
       };
     }
   }, [quizId, attemptId, fetchAllDataDirectly]);
-  
+
   // Also use React Query for backup fallback data
   useEffect(() => {
     if (quizId) {

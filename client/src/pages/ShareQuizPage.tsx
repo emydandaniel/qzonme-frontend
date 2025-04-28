@@ -13,6 +13,7 @@ interface ShareQuizPageProps {
 const ShareQuizPage: React.FC<ShareQuizPageProps> = ({ params }) => {
   const quizId = parseInt(params.quizId);
   const { toast } = useToast();
+  const BASE_URL = import.meta.env.VITE_API_URL;
 
   // Fetch quiz with proper type
   const { data: quiz, isLoading: isLoadingQuiz, error } = useQuery<{
@@ -22,7 +23,7 @@ const ShareQuizPage: React.FC<ShareQuizPageProps> = ({ params }) => {
     creatorName: string;
     createdAt: string;
   }>({
-    queryKey: [`/api/quizzes/${quizId}`],
+    queryKey: [`${BASE_URL}/api/quizzes/${quizId}`],
     staleTime: 0, // Don't use cached data
     refetchOnMount: true, // Always fetch on component mount
   });

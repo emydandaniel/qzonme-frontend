@@ -27,10 +27,11 @@ const TestQuizLookup: React.FC = () => {
   const { toast } = useToast();
   
   const currentUrl = window.location.origin;
+  const BASE_URL = import.meta.env.VITE_API_URL;
 
   // Fetch existing quizzes to populate the dropdown
   const { data: availableQuizzes = [] } = useQuery<Quiz[]>({
-    queryKey: ['/api/quizzes'],
+    queryKey: [`${BASE_URL}/api/quizzes`],
     retry: false,
     refetchOnWindowFocus: false,
   });
